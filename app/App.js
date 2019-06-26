@@ -47,6 +47,7 @@ import ErrorBoundary from './containers/ErrorBoundary';
 import ui from 'nuclear-ui';
 import NavButtons from './components/NavButtons';
 import PlayerControls from './components/PlayerControls';
+import PlayerSongControls from './components/PlayerSongControls';
 import Seekbar from './components/Seekbar';
 import SidebarMenu from './components/SidebarMenu';
 import SidebarMenuItem from './components/SidebarMenu/SidebarMenuItem';
@@ -64,8 +65,8 @@ class App extends React.Component {
   componentDidMount() {
     this.props.actions.loadPlaylists();
   }
-  
-  togglePlayback () {
+
+  togglePlayback() {
     if (
       this.props.player.playbackStatus === Sound.status.PAUSED &&
       this.props.scrobbling.lastFmScrobblingEnabled &&
@@ -83,7 +84,7 @@ class App extends React.Component {
     this.props.actions.togglePlayback(this.props.player.playbackStatus);
   }
 
-  nextSong () {
+  nextSong() {
     this.props.actions.nextSong();
     if (
       this.props.scrobbling.lastFmScrobblingEnabled &&
@@ -100,7 +101,7 @@ class App extends React.Component {
     }
   }
 
-  renderNavBar () {
+  renderNavBar() {
     return (
       <Navbar className={styles.navbar}>
         <NavButtons
@@ -110,18 +111,20 @@ class App extends React.Component {
           historyCurrentIndex={this.props.history.index}
         />
         <SearchBoxContainer />
-        <Spacer style={{
-          height: '100%',
-          flex: '1 1 45%',
-          WebkitAppRegion: 'drag'
-        }}/>
+        <Spacer
+          style={{
+            height: '100%',
+            flex: '1 1 45%',
+            WebkitAppRegion: 'drag'
+          }}
+        />
         <HelpModal />
         {this.props.settings.framelessWindow && <WindowControls />}
       </Navbar>
     );
   }
 
-  renderRightPanel (settings) {
+  renderRightPanel(settings) {
     return (
       <VerticalPanel
         className={classnames(styles.right_panel, {
@@ -132,8 +135,8 @@ class App extends React.Component {
       </VerticalPanel>
     );
   }
-  
-  renderSidebarMenu (settings, toggleOption) {
+
+  renderSidebarMenu(settings, toggleOption) {
     const { t } = this.props;
 
     return (
@@ -155,8 +158,18 @@ class App extends React.Component {
           <SidebarMenuCategoryHeader compact={settings.compactMenuBar}>
             Main
           </SidebarMenuCategoryHeader>
-          {this.renderNavLink('dashboard', 'dashboard', t('dashboard'), settings)}
-          {this.renderNavLink('downloads', 'download', t('downloads'), settings)}
+          {this.renderNavLink(
+            'dashboard',
+            'dashboard',
+            t('dashboard'),
+            settings
+          )}
+          {this.renderNavLink(
+            'downloads',
+            'download',
+            t('downloads'),
+            settings
+          )}
           {this.renderNavLink('lyrics', 'microphone', t('lyrics'), settings)}
           {this.renderNavLink('plugins', 'flask', t('plugins'), settings)}
           {this.renderNavLink('search', 'search', t('search'), settings)}
@@ -166,20 +179,29 @@ class App extends React.Component {
           <SidebarMenuCategoryHeader compact={settings.compactMenuBar}>
             {t('collection')}
           </SidebarMenuCategoryHeader>
-          {this.renderNavLink('favorites/tracks', 'star', t('favorite'), settings)}
-          {this.renderNavLink('library', 'file-sound-o', t('library'), settings)}
+          {this.renderNavLink(
+            'favorites/tracks',
+            'star',
+            t('favorite'),
+            settings
+          )}
+          {this.renderNavLink(
+            'library',
+            'file-sound-o',
+            t('library'),
+            settings
+          )}
 
-          {
-            !_.isEmpty(this.props.playlists) &&
+          {!_.isEmpty(this.props.playlists) && (
             <SidebarMenuCategoryHeader compact={settings.compactMenuBar}>
               {t('playlists')}
             </SidebarMenuCategoryHeader>
-          }
+          )}
           <PlaylistsSubMenu
             playlists={this.props.playlists}
             compact={settings.compactMenuBar}
           />
-          
+
           <Spacer />
           {this.renderSidebarFooter(settings, toggleOption)}
         </SidebarMenu>
@@ -187,7 +209,7 @@ class App extends React.Component {
     );
   }
 
-  renderNavLink (name, icon, prettyName, settings) {
+  renderNavLink(name, icon, prettyName, settings) {
     return (
       <NavLink to={'/' + name} activeClassName={styles.active_nav_link}>
         <SidebarMenuItem>
@@ -197,7 +219,7 @@ class App extends React.Component {
     );
   }
 
-  renderSidebarFooter (settings, toggleOption) {
+  renderSidebarFooter(settings, toggleOption) {
     return (
       <div className='sidebar_footer'>
         <a
@@ -217,7 +239,7 @@ class App extends React.Component {
     );
   }
 
-  renderFooter (settings) {
+  renderFooter(settings) {
     return (
       <Footer className={styles.footer}>
         <Seekbar
@@ -229,6 +251,7 @@ class App extends React.Component {
           <div className={styles.track_info_wrapper}>
             {this.renderCover()}
             {this.renderTrackInfo()}
+            {this.renderPlayerSongControls()}
           </div>
           {this.renderPlayerControls()}
           {this.renderVolumeControl(settings)}
@@ -237,7 +260,7 @@ class App extends React.Component {
     );
   }
 
-  renderCover () {
+  renderCover() {
     return (
       <ui.Cover
         cover={
@@ -250,13 +273,13 @@ class App extends React.Component {
     );
   }
 
-  getCurrentSongParameter (parameter) {
+  getCurrentSongParameter(parameter) {
     return this.props.queue.queueItems[this.props.queue.currentSong]
       ? this.props.queue.queueItems[this.props.queue.currentSong][parameter]
       : null;
   }
 
-  renderTrackInfo () {
+  renderTrackInfo() {
     return (
       <TrackInfo
         track={this.getCurrentSongParameter('name')}
@@ -266,7 +289,7 @@ class App extends React.Component {
       />
     );
   }
-  renderPlayerControls () {
+  renderPlayerControls() {
     const { player, queue } = this.props;
     const couldPlay = queue.queueItems.length > 0;
     const couldForward = queue.currentSong + 1 < queue.queueItems.length;
@@ -283,7 +306,18 @@ class App extends React.Component {
     );
   }
 
-  renderVolumeControl (settings) {
+  renderPlayerSongControls() {
+    const { player, queue } = this.props;
+
+    return queue.queueItems.length > 0 ? (
+      <PlayerSongControls
+        playing={player.playbackStreamLoading}
+        loading={player.playbackStreamLoading}
+      />
+    ) : null;
+  }
+
+  renderVolumeControl(settings) {
     return (
       <VolumeControls
         fill={this.props.player.volume}
@@ -296,13 +330,13 @@ class App extends React.Component {
     );
   }
 
-  componentWillMount () {
+  componentWillMount() {
     this.props.actions.readSettings();
     this.props.actions.lastFmReadSettings();
     this.props.actions.createSearchPlugins(PluginConfig.plugins);
   }
 
-  render () {
+  render() {
     let { settings } = this.props;
     let { toggleOption } = this.props.actions;
     return (
@@ -322,14 +356,14 @@ class App extends React.Component {
             <IpcContainer />
           </div>
         </ErrorBoundary>
-        <ShortcutsContainer/>
-        <ToastContainer/>
+        <ShortcutsContainer />
+        <ToastContainer />
       </React.Fragment>
     );
   }
 }
 
-function mapStateToProps (state) {
+function mapStateToProps(state) {
   return {
     queue: state.queue,
     player: state.player,
@@ -339,7 +373,7 @@ function mapStateToProps (state) {
   };
 }
 
-function mapDispatchToProps (dispatch) {
+function mapDispatchToProps(dispatch) {
   return {
     actions: bindActionCreators(
       Object.assign(

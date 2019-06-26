@@ -1,0 +1,13 @@
+@import "../../../vars.scss";
+@import "../../../mixin.scss";
+
+.player_song_controls {
+  font-size: 36px;
+  color: rgba($white, 0.25);
+
+  @include transition;
+
+  &:hover {
+    color: $white;
+  }
+}
