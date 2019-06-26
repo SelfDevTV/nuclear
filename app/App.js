@@ -10,6 +10,7 @@ import { withTranslation } from 'react-i18next';
 
 import * as Actions from './actions';
 import * as PlayerActions from './actions/player';
+import * as FavoriteActions from './actions/favorites';
 import * as PlaylistsActions from './actions/playlists';
 import * as PluginsActions from './actions/plugins';
 import * as QueueActions from './actions/queue';
@@ -307,12 +308,17 @@ class App extends React.Component {
   }
 
   renderPlayerSongControls() {
-    const { player, queue } = this.props;
+    const { player, queue, favorites } = this.props;
+
+    console.log(this.props.addFavoriteTrack);
 
     return queue.queueItems.length > 0 ? (
       <PlayerSongControls
         playing={player.playbackStreamLoading}
         loading={player.playbackStreamLoading}
+        favorites={favorites}
+        addToFavorites={this.props.actions.addFavoriteTrack}
+        tracks={queue.queueItems}
       />
     ) : null;
   }
@@ -369,7 +375,8 @@ function mapStateToProps(state) {
     player: state.player,
     playlists: state.playlists.playlists,
     scrobbling: state.scrobbling,
-    settings: state.settings
+    settings: state.settings,
+    favorites: state.favorites
   };
 }
 
@@ -384,6 +391,7 @@ function mapDispatchToProps(dispatch) {
         PlayerActions,
         PlaylistsActions,
         PluginsActions,
+        FavoriteActions,
         Actions
       ),
       dispatch

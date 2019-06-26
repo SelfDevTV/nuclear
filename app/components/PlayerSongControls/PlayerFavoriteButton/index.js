@@ -15,7 +15,7 @@ const PlayerFavoriteButton = ({ onClick, loading, playing, icon }) => {
     } else {
       return (
         <div className={styles.player_song_controls}>
-          <FontAwesome name='star' />
+          <FontAwesome name='star' onClick={onClick} />
         </div>
       );
     }
